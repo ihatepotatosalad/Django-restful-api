@@ -11,6 +11,6 @@ class CalcTests(SimpleTestCase):
         """
         Test adding numbers
         """
-        res = calc.add(5,3)
+        res = calc.add(5, 3)
 
-        self.assertEqual(res,8)
+        self.assertEqual(res, 8)
