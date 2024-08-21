@@ -32,9 +32,9 @@ class AuthTokenSerializer(serializers.Serializer):
     },
         trim_whitespace=False)
 
-    def validate(self, attib):
-        email = attib.get('email')
-        password = attib.get('password')
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
         user = authenticate(request=self.context.get('request'),
                             username=email,
                             password=password
@@ -42,5 +42,5 @@ class AuthTokenSerializer(serializers.Serializer):
         if not user:
             msg = _('unable to authenticate user')
             raise serializers.ValidationError(msg, code='authorization')
-        attib['user'] = user
-        return attib
+        attrs['user'] = user
+        return attrs
