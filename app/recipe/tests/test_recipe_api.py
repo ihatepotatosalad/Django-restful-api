@@ -19,12 +19,12 @@ def create_recipe(user, **kwargs):
         'user': user,
         'title': 'recipe_title',
         'description': 'recipe_description',
-        'time_minute': 5,
+        'time_minutes': 5,
         'price': Decimal(5.25),
         'link': 'http://example.com'
     }
     default.update(**kwargs)
-    recipe = Recipe.objects.create(default)
+    recipe = Recipe.objects.create(**default)
 
     return recipe
 
@@ -57,7 +57,8 @@ class PrivateRecipeAPITest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_recipe_list_limited_to_user(self):
-        other_user = get_user_model().objects.create('new@example.com', 'testinggogogo')
+        other_user = get_user_model().objects.create_user(
+            'new@example.com', 'testinggogogo')
         create_recipe(user=other_user)
         create_recipe(user=self.user)
         res = self.client.get(RECIPES_URL)
