@@ -11,6 +11,10 @@ from recipe.serializers import TagSerializer
 TAG_URL = reverse('recipe:tag-list')
 
 
+def create_tag_url(tag_id):
+    return reverse('recipe:tag-detail', args=[tag_id])
+
+
 def create_user(email='test@example.com', password='testing123'):
     return get_user_model().objects.create_user(email, password)
 
@@ -48,3 +52,12 @@ class PrivateTagsAPIRequest(TestCase):
         Tag.objects.create(user=user2, name='Desert')
         res = self.client.get(TAG_URL)
         self.assertEqual(len(res.data), 1)
+
+    def test_update_tag(self):
+        tag = Tag.objects.create(user=self.user, name='Vegan')
+        payload = {
+            'name': 'Desert'
+        }
+        self.client.patch(create_tag_url(tag.id), payload)
+        tag.refresh_from_db()
+        self.assertEqual(tag.name, payload['name'])
