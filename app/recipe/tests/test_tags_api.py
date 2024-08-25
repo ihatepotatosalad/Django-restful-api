@@ -61,3 +61,9 @@ class PrivateTagsAPIRequest(TestCase):
         self.client.patch(create_tag_url(tag.id), payload)
         tag.refresh_from_db()
         self.assertEqual(tag.name, payload['name'])
+
+    def test_delete_tag(self):
+        tag = Tag.objects.create(user=self.user, name='Vegan')
+        self.client.delete(create_tag_url(tag.id))
+        tags = Tag.objects.filter(user=self.user)
+        self.assertFalse(tags.exists())

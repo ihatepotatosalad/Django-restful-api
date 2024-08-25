@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from core.models import Recipe
+from core.models import Recipe, Tag
 
 from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
 
@@ -95,3 +95,41 @@ class PrivateRecipeAPITest(TestCase):
         for k, v in payload.items():
             self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
+
+    def test_create_recipe_with_tag(self):
+        payload = {
+            'title': 'thai curry',
+            'time_minutes': 30,
+            'price': Decimal('2.50'),
+            'tags': [{'name': 'thai', 'name': 'Dinner'}]
+        }
+        res = self.client.post(RECIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipes = Recipe.objects.filter(user=self.user)
+        recipe = recipes[0]
+        self.assertEqual(recipes.count(), 1)
+        self.assertEqual(recipe.tags.count(), 2)
+
+    def test_create_recipe_with_existing_tags(self):
+        tag = Tag.objects.create(user=self.user, name='thai')
+        payload = {
+            'title': 'thai curry',
+            'time_minutes': 30,
+            'price': Decimal('2.50'),
+            'tags': [{'name': 'thai', 'name': 'Dinner'}]
+        }
+        res = self.client.post(RECIPES_URL, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        recipes = Recipe.objects.filter(user=self.user)
+        recipe = recipes[0]
+        self.assertEqual(recipes.count(), 1)
+        self.assertEqual(recipe.tags.count(), 2)
+        self.assertIn(tag, recipe.tags.all())
+        for tag in recipe['tags']:
+            exists = recipe.tags.filter(
+                name=tag['name'],
+                user=self.user
+            ).exists()
+            self.assertTrue(exists)
