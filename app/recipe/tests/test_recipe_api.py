@@ -101,7 +101,7 @@ class PrivateRecipeAPITest(TestCase):
             'title': 'thai curry',
             'time_minutes': 30,
             'price': Decimal('2.50'),
-            'tags': [{'name': 'thai', 'name': 'Dinner'}]
+            'tags': [{'name': 'thai'}, {'name': 'Dinner'}]
         }
         res = self.client.post(RECIPES_URL, payload, format='json')
 
@@ -117,7 +117,7 @@ class PrivateRecipeAPITest(TestCase):
             'title': 'thai curry',
             'time_minutes': 30,
             'price': Decimal('2.50'),
-            'tags': [{'name': 'thai', 'name': 'Dinner'}]
+            'tags': [{'name': 'thai'}, {'name': 'Dinner'}]
         }
         res = self.client.post(RECIPES_URL, payload, format='json')
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -127,7 +127,7 @@ class PrivateRecipeAPITest(TestCase):
         self.assertEqual(recipes.count(), 1)
         self.assertEqual(recipe.tags.count(), 2)
         self.assertIn(tag, recipe.tags.all())
-        for tag in recipe['tags']:
+        for tag in payload['tags']:
             exists = recipe.tags.filter(
                 name=tag['name'],
                 user=self.user
