@@ -133,3 +133,30 @@ class PrivateRecipeAPITest(TestCase):
                 user=self.user
             ).exists()
             self.assertTrue(exists)
+
+    def test_create_tag_on_update(self):
+        recipe = create_recipe(user=self.user)
+        payload = {
+            'tags': [{
+                'name': 'Thai'
+            }]
+        }
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_tag = Tag.objects.get(user=self.user, name='Thai')
+        self.assertIn(new_tag, recipe.tags.all())
+
+    def test_reassign_tags_recipe(self):
+        breakfast_tag = Tag.objects.create(user=self.user, name='breakfast')
+        thai_tag = Tag.objects.create(user=self.user, name='Thai')
+        recipe = create_recipe(user=self.user)
+        recipe.tags.add(breakfast_tag)
+        payload = {
+            'tags': [{'name': 'Thai'}]
+        }
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(thai_tag, recipe.tags.all())
+        self.assertNotIn(breakfast_tag, recipe.tags.all())
